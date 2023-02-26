@@ -48,6 +48,7 @@ pipeline{
                         echo 'Start Build Code'
                         mvn clean install -DskipTests=true -U -Dversion=${Version}
 
+                        yum install zip unzip -y
                         cd ${WORKSPACE}
                         rm -f report.zip
                         zip -r report.zip ReportOut
