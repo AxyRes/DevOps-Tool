@@ -7,9 +7,6 @@ pipeline{
             reuseNode true
         }
     }
-    options {
-        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '10', dayToKeepStr: '', numToKeepStr: '10')
-    }
     environment {
         Version="1.0-SNAPSHOT"
         PJNAME="Quiz-Online"
