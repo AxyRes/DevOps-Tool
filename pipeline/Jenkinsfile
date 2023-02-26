@@ -8,7 +8,7 @@ pipeline{
         }
     }
     option{
-        buildDiscarder logRotator(artifactDaysToKeepStr: ''. artifactNumToKeepStr: '10', dayToKeepStr: '', numToKeepStr: '10')
+        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '10', dayToKeepStr: '', numToKeepStr: '10')
     }
     enviroment{
         Version="1.0-SNAPSHOT"
