@@ -1,16 +1,16 @@
 #!groovy?
 pipeline{
     agent{
-        docker{
+        docker {
             image 'maven:3.8.6-amazoncorretto-17'
             args '--user=0 -v $WORKSPACE:/tmp/sbapp -w /temp/sbapp'
             reuseNode true
         }
     }
-    option{
+    options {
         buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '10', dayToKeepStr: '', numToKeepStr: '10')
     }
-    enviroment{
+    environment {
         Version="1.0-SNAPSHOT"
         PJNAME="Quiz-Online"
         Branch="dev"
