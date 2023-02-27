@@ -69,7 +69,7 @@ pipeline{
                             docker rmi -f pj_$container_name || true
                             docker volume rm webapps || true
                             docker volume create webapps
-                            [[ $Start_container == "true" ]] && start_container="" && detach="-d"
+                            [[ $Start_container == "true" ]] && start_containers="" && detach="--detach"
                             cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $1
                         }
                         [[ $PJ_admin == "true" ]] && build_docker admin
