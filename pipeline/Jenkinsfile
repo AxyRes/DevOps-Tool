@@ -2,7 +2,7 @@
 pipeline{
     agent{
         docker {
-            image 'maven:3.8.6-amazoncorretto-17'
+            image 'axyres/maven:3.8.6-aws-17'
             args '--user=0 -v $WORKSPACE:/tmp/sbapp -w /temp/sbapp'
             reuseNode true
         }
@@ -34,7 +34,6 @@ pipeline{
         stage('Stage 3 Get commit harsh'){
             steps{
                 sh"""
-                    yum install git zip unzip -y
                     cd ${WORKSPACE}/
                     echo "${PJNAME}" > ${WORKSPACE}/commit.txt
                     /bin/git log -1 --pretty=format:'%h, %an, %ar, %aD, %s' >> ${WORKSPACE}/commit.txt
@@ -94,11 +93,13 @@ pipeline{
             deleteDir()
         }
         success {
-            telegramSend (message: "[SUCCESS] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion", chatId: "${ChatID_Telegram}")
+            echo 'I success'
+            telegramSend (message: """[BUILD SUCCESS] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion \nHere is commit changes: <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div><div style=\\"padding-left:30px;\\"> &#8212; &#8220;<em>%r</em>&#8221;</div>", pathFormat="</div><div style=\\"padding-left:30px;\\">%p"}</p>""", chatId: "${ChatID_Telegram}")
         }
 
         failure {
-            telegramSend (message: "[FAILED] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion", chatId: "${ChatID_Telegram}")
+            echo 'I failure'
+            telegramSend (message: """[BUILD FAILED] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion \nHere is commit changes: <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div><div style=\\"padding-left:30px;\\"> &#8212; &#8220;<em>%r</em>&#8221;</div>", pathFormat="</div><div style=\\"padding-left:30px;\\">%p"}</p>""", chatId: "${ChatID_Telegram}")
         }
     }
 }
