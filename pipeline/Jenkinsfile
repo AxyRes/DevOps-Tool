@@ -104,11 +104,11 @@ pipeline{
             }
         }
     }
-    post {
-            always{
-                echo 'One or anthor ways, I have finined'
-                deleteDir()
-            }
+    post{
+        always{
+            echo 'One way or another, I have finished'
+            deleteDir()
+        }
     }
 }
 
