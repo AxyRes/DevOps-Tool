@@ -95,22 +95,15 @@ pipeline{
             sendEmail()
         }
         success {
-            withCredentials([string(credentialsId: "$CredentialID_Telegram", variable: 'TELEGRAM_CREDENTIAL')]) {
-                def bot_name = 'jenkins_axyres_bot' // replace with your actual bot name
-                def chat_id = '5595929242' // replace with your actual chat ID
-                telegramSend message: "The build of ${PJNAME} has succeeded!",
-                    botToken: "${TELEGRAM_CREDENTIAL}",
-                    chatId: "${chat_id}"
-            }
+            telegramSend message: "The build has succeeded!",
+                chatId: '5595929242',
+                tokenCredentialId: '$CredentialID_Telegram'
         }
-        failure{
-            withCredentials([string(credentialsId: "$CredentialID_Telegram", variable: 'TELEGRAM_CREDENTIAL')]) {
-                def bot_name = 'jenkins_axyres_bot' // replace with your actual bot name
-                def chat_id = '5595929242' // replace with your actual chat ID
-                telegramSend message: "The build of ${PJNAME} has succeeded!",
-                    botToken: "${TELEGRAM_CREDENTIAL}",
-                    chatId: "${chat_id}"
-            }
+
+        failure {
+            telegramSend message: "The build has failed!",
+                chatId: '5595929242',
+                tokenCredentialId: '$CredentialID_Telegram'
         }
     }
 }
