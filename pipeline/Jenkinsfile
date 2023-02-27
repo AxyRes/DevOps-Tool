@@ -25,7 +25,6 @@ pipeline{
     stages{
         stage('Stage 1 Get Package from artifactory'){
             steps{
-                 {
                     sh """
                         mkdir -p packages/
                         rm -rf packages/*
