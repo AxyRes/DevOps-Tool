@@ -1,0 +1,120 @@
+#!groovy?
+pipeline{
+    agent{
+        docker {
+            image 'axyres/dockercentos:1.0'
+            args '--user=0 -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '8', artifactNumToKeepStr: '8', daysToKeepStr: '7', artifactDaysToKeepStr: '7'))
+    }
+    environment {
+        Branch=""
+        CredentialID=""
+        CredentialID_Nexus=""
+        Tag=""
+        image1=""
+        RepoDockerHub=""
+    }
+    parameters {
+        string(name: "buildVersion", defaultValue: '', description: 'Build Version')
+        string(name: "buildBranch", defaultValue: '', description: 'Build Branch')
+        string(name: "PJNAME", defaultValue: '', description: 'Project Name')
+        string(name: "Version", defaultValue: '', description: 'Version Project')
+        booleanParam(name: 'PJ_admin', defaultValue: 'false', description: 'Build Admin Image')
+        booleanParam(name: 'Start_container', defaultValue: 'false', description: 'Start container')
+        booleanParam(name: 'Push_images_to_Hub', defaultValue: 'false', description: 'Push images to AxyResHub')
+    }
+    stages{
+        stage('Stage 1 Get Package from artifactory'){
+            steps{
+                withCredentials([usernamePassword(credentialsId: "$CredentialID_Nexus", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
+                    sh """
+                        mkdir -p packages/
+                        rm -rf packages/*
+                        cd packages/
+                        echo Start download package
+                        if [ $PJ_admin == true ]
+                        then
+                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war
+                            mv ${PJNAME}-${Version}.war ${PJNAME}.war
+                        fi
+                        echo Done download package
+                    """
+                }
+            }
+        }
+        stage('Stage 2 Prepare the package'){
+            steps{
+                script{
+                    sh'''
+                        prepare_package () {
+                            app=$1
+                            package=${PJNAME}.war
+                            cp -f ${WORKSPACE}/packages/${PJNAME}.war ${WORKSPACE}/docker/$app/${PJNAME}.war
+                            cd ${WORKSPACE}/docker/$app
+                            sed -i "s|\\$package_file|$package|g" Dockerfile
+                        }
+                        [[ $PJ_admin == "true" ]] && prepare_package admin
+                    '''
+                }
+            }
+        }
+        stage('Stage 3 Build Docker Image'){
+            steps{
+                script{
+                    sh'''
+                        echo Start Build Docker Image
+                        build_docker () {
+                            service=$1
+                            start_containers="--no-start"
+                            detach=""
+                            container_name="$(echo $service | tr - _)"
+                            docker rm -f $container_name || true
+                            docker rmi -f pj_$container_name || true
+                            docker volume rm webapps || true
+                            docker volume create webapps
+                            [[ $Start_container == "true" ]] && start_containers="" && detach="--detach"
+                            cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $1
+                        }
+                        [[ $PJ_admin == "true" ]] && build_docker admin
+                        echo End Build Docker Images
+                    '''
+                }
+            }
+        }
+        stage('Stage 4 Push image to Docker Hub') {
+            steps{
+                script{
+                    withCredentials([usernamePassword(credentialsId: "$CredentialID", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
+                        sh '''
+                            docker login -u ${ARTIFACTORY_USER} -p ${ARTIFACTORY_PASSWORD}
+                            upload_docker_images_to_Hub () {
+                                image=$1
+                                app=$2
+                                if [ $Push_images_to_Hub == "true" ]
+                                then
+                                    echo Start Push image to Docker Hub
+                                    docker tag $image ${RepoDockerHub}/$app-${buildBranch}:$Tag-${buildVersion}
+                                    docker push ${RepoDockerHub}/$app-${buildBranch}:$Tag-${buildVersion}
+                                fi
+                            }
+                            [[ $PJ_admin == "true" ]] && upload_docker_images_to_Hub $image1:$Tag quizonline
+                        '''
+                    }
+                }
+            }
+        }
+    }
+    post{
+        always{
+            echo 'One way or another, I have finished'
+            deleteDir()
+        }
+    }
+}
+
+String determineRepoName() {
+    return scm.getUserRemoteConfigs()[0].getUrl().tokenize('/').last().split("\\.")[0]
+}
