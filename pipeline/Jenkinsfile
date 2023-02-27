@@ -43,7 +43,7 @@ pipeline{
         stage('Stage 2 Prepare the package'){
             steps{
                 script{
-                    sh"""
+                    sh'''
                         prepare_package () {
                             app=$1
                             package=${WORKSPACE}/packages/${PJNAME}.war
@@ -51,14 +51,14 @@ pipeline{
                             sed -i "s|\\$package_file|$package|g" Dockerfile
                         }
                         [[ $PJ_admin == "true" ]] && prepare_package admin
-                    """
+                    '''
                 }
             }
         }
         stage('Stage 3 Build Docker Image'){
             steps{
                 script{
-                    sh"""
+                    sh'''
                         build_docker () {
                             service=$1
                             start_containers="--no-start"
@@ -73,7 +73,7 @@ pipeline{
                             cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $1
                         }
                         [[ $PJ_admin == "true" ]] && build_docker admin
-                    """
+                    '''
                 }
             }
         }
