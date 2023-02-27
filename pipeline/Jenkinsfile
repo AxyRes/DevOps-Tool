@@ -10,6 +10,7 @@ pipeline{
     environment {
         Branch="dev"
         CredentialID="credential_docker_axyreshub"
+        CredentialID_Nexus="credential_nexus_admin"
     }
     parameters {
         string(name: "buildVersion", defaultValue: '', description: 'Build Version')
