@@ -116,7 +116,7 @@ pipeline{
                     <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div><div style=\\"padding-left:30px;\\"> &#8212; &#8220;<em>%r</em>&#8221;</div>", pathFormat="</div><div style=\\"padding-left:30px;\\">%p"}</p>
                 ''',
                 mimeType: 'text/html',
-                to: "nhattien.lam.454@gmail.com"
+                to: "nhattien.lam.454@gmail.com",
                 replyTo:'jenkins-notification@gmail.com'
             )
         }
