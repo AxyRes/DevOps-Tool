@@ -87,6 +87,36 @@ pipeline{
             }
         }
     }
+    post{
+        always{
+            echo 'One way or another, I have finished'
+            deleteDir()
+        }
+        sucess {
+            emailext(
+                subject: "[SUCCESS] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}",
+                body: '''
+                    <p> *** This is an automatically generated email. Please do not reply ***</p>
+                    <p>Please review <strong><u>your change</u></strong> below:</p>
+                    <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div>}
+                ''',
+                mineType: 'text/html',
+                to: "nhattien.lam.454@gmail.com"
+            )
+        }
+        failture{
+            emailext(
+                subject: "[FAILED] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}",
+                body: '''
+                    <p> *** This is an automatically generated email. Please do not reply ***</p>
+                    <p>Please review <strong><u>your change</u></strong> below:</p>
+                    <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div>}
+                ''',
+                mineType: 'text/html',
+                to: "nhattien.lam.454@gmail.com"
+            )
+        }
+    }
 }
 String determineRepoName() {
     return scm.getUserRemoteConfigs()[0].getUrl().tokenize('/').last().split("\\.")[0]
