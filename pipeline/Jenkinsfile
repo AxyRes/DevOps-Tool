@@ -11,7 +11,7 @@ pipeline{
         CredentialID="credential_docker_axyreshub"
         CredentialID_Nexus="credential_nexus_admin"
         Tag="1.0"
-        images1="admin"
+        image1="admin"
     }
     parameters {
         string(name: "buildVersion", defaultValue: '', description: 'Build Version')
