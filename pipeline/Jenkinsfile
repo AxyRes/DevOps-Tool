@@ -56,7 +56,7 @@ pipeline{
         }
         stage('Stage 5 Upload to Nexus Repository') {
             steps{
-                scrpit{
+                script{
                     withCredentials([usernamePassword(credentialsId: "$CredentialID_Nexus", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
                         sh"""
                             echo Start Push pakage to Artifactory ......
