@@ -97,15 +97,15 @@ pipeline{
         success {
             withCredentials([usernamePassword(credentialsId: "$CredentialID_Telegram", passwordVariable:'TELEGRAM_PASSWORD', usernameVariable:'TELEGRAM_USER')]) {
                 telegramSend message: "The build of ${PJNAME} has success!",
-                chatId: 'TELEGRAM_USER',
-                tokenCredentialId: 'TELEGRAM_PASSWORD'
+                chatId: '${TELEGRAM_USER}',
+                tokenCredentialId: '${TELEGRAM_PASSWORD}'
             }
         }
         failure{
             withCredentials([usernamePassword(credentialsId: "$CredentialID_Telegram", passwordVariable:'TELEGRAM_PASSWORD', usernameVariable:'TELEGRAM_USER')]) {
                 telegramSend message: "The build of ${PJNAME} has failure!",
-                chatId: 'TELEGRAM_USER',
-                tokenCredentialId: 'TELEGRAM_PASSWORD'
+                chatId: '${TELEGRAM_USER}',
+                tokenCredentialId: '${TELEGRAM_PASSWORD}'
             }
         }
     }
