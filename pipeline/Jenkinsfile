@@ -25,6 +25,7 @@ pipeline{
     stages{
         stage('Stage 1 Get Package from artifactory'){
             steps{
+                withCredentials([usernamePassword(credentialsId: "$CredentialID", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
                     sh """
                         mkdir -p packages/
                         rm -rf packages/*
@@ -39,6 +40,7 @@ pipeline{
                     """
                 }
             }
+        }
         stage('Stage 2 Prepare the package'){
             steps{
                 script{
