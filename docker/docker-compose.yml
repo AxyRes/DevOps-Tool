@@ -2,7 +2,7 @@ version: "2.0"
 services:
   admin:
     build: admin/.
-    image: admin
+    image: admin:1.0
     container_name: admin
     ports:
       - "18080:8080"

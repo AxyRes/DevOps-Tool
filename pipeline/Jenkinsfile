@@ -10,6 +10,8 @@ pipeline{
         Branch="dev"
         CredentialID="credential_docker_axyreshub"
         CredentialID_Nexus="credential_nexus_admin"
+        Tag="1.0"
+        images1="admin"
     }
     parameters {
         string(name: "buildVersion", defaultValue: '', description: 'Build Version')
@@ -23,7 +25,7 @@ pipeline{
     stages{
         stage('Stage 1 Get Package from artifactory'){
             steps{
-                withCredentials([usernamePassword(credentialsId: "$CredentialID_Nexus", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
+                 {
                     sh """
                         mkdir -p packages/
                         rm -rf packages/*
@@ -76,6 +78,28 @@ pipeline{
                         [[ $PJ_admin == "true" ]] && build_docker admin
                         echo End Build Docker Images
                     '''
+                }
+            }
+        }
+        stage('Stage 4 Push image to Docker Hub') {
+            steps{
+                script{
+                    withCredentials([usernamePassword(credentialsId: "$CredentialID", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
+                        sh '''
+                            docker login -u $ARTIFACTORY_USER -p $ARTIFACTORY_PASSWORD
+                            upload_docker_images_to_Hub () {
+                                image=$1
+                                app=$2
+                                if [ $Push_images_to_Hub == "true" ]
+                                then
+                                    echo Start Push image to Docker Hub
+                                    docker tag $image axyres/$app-${buildBranch}:$Tag-${buildVersion}
+                                    docker push axyres/$app-${buildBranch}:$Tag-${buildVersion}
+                                fi
+                            }
+                            [[ $PJ_admin == "true" ]] && upload_docker_images_to_Hub $image1:$Tag quizonline
+                        '''
+                    }
                 }
             }
         }
