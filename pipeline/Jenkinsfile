@@ -94,12 +94,12 @@ pipeline{
         }
         success {
             echo 'I success'
-            telegramSend (message: """[BUILD SUCCESS] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion \nHere is commit changes: <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div><div style=\\"padding-left:30px;\\"> &#8212; &#8220;<em>%r</em>&#8221;</div>", pathFormat="</div><div style=\\"padding-left:30px;\\">%p"}</p>""", chatId: "${ChatID_Telegram}")
+            telegramSend (message: """[BUILD SUCCESS] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion \nHere is commit changes: ${CHANGES, showPaths=true, format="%a: %m: %d %p &#8212; &#8220; %r&#8221;", pathFormat="%p"}""", chatId: "${ChatID_Telegram}")
         }
 
         failure {
             echo 'I failure'
-            telegramSend (message: """[BUILD FAILED] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion \nHere is commit changes: <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div><div style=\\"padding-left:30px;\\"> &#8212; &#8220;<em>%r</em>&#8221;</div>", pathFormat="</div><div style=\\"padding-left:30px;\\">%p"}</p>""", chatId: "${ChatID_Telegram}")
+            telegramSend (message: """[BUILD FAILED] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion \nHere is commit changes: ${CHANGES, showPaths=true, format="%a: %m: %d %p &#8212; &#8220; %r&#8221;", pathFormat="%p"}""", chatId: "${ChatID_Telegram}")
         }
     }
 }
