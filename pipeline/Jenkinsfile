@@ -94,26 +94,30 @@ pipeline{
         }
         success {
             emailext(
-                subject: "[SUCCESS] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}",
+                subject: "[BUILD SUCCESS] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}",
                 body: '''
+                    <p>Hi All,</p>
                     <p> *** This is an automatically generated email. Please do not reply ***</p>
                     <p>Please review <strong><u>your change</u></strong> below:</p>
-                    <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div>}
+                    <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div><div style=\\"padding-left:30px;\\"> &#8212; &#8220;<em>%r</em>&#8221;</div>", pathFormat="</div><div style=\\"padding-left:30px;\\">%p"}</p>
                 ''',
                 mimeType: 'text/html',
                 to: "nhattien.lam.454@gmail.com"
+                replyTo:'jenkins-notification@gmail.com'
             )
         }
         failure{
             emailext(
-                subject: "[FAILED] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}",
+                subject: "[BUILD FAILED] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}",
                 body: '''
+                    <p>Hi All,</p>
                     <p> *** This is an automatically generated email. Please do not reply ***</p>
                     <p>Please review <strong><u>your change</u></strong> below:</p>
-                    <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div>}
+                    <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div><div style=\\"padding-left:30px;\\"> &#8212; &#8220;<em>%r</em>&#8221;</div>", pathFormat="</div><div style=\\"padding-left:30px;\\">%p"}</p>
                 ''',
                 mimeType: 'text/html',
                 to: "nhattien.lam.454@gmail.com"
+                replyTo:'jenkins-notification@gmail.com'
             )
         }
     }
