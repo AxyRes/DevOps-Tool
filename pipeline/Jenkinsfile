@@ -97,16 +97,14 @@ pipeline{
         success {
             telegramSend (
                 message: "The build has succeeded!",
-                chatId: 5595929242,
-                botToken: 6144187064:AAGs78UME422-nU-5qkWIbgZyCe6L3YNz8w
+                chatId: 5595929242
             )
         }
 
         failure {
             telegramSend (
                 message: "The build has failure!",
-                chatId: 5595929242,
-                botToken: 6144187064:AAGs78UME422-nU-5qkWIbgZyCe6L3YNz8w
+                chatId: 5595929242
             )
         }
     }
