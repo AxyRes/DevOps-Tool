@@ -39,7 +39,6 @@ pipeline{
                     """
                 }
             }
-        }
         stage('Stage 2 Prepare the package'){
             steps{
                 script{
