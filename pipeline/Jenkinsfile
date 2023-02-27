@@ -73,7 +73,7 @@ pipeline{
         stage('Stage 6 Trigger build job image') {
             steps {
                 script {
-                    build job: "Quiz-Online-Dev-Image", parameters [
+                    build job: "Quiz-Online-Dev-Image", parameters: [
                         string(name: "buildVersion", value: "${buildVersion}"),
                         string(name: "buildBranch", value: "${Branch}"),
                         string(name: "PJNAME", value: "${PJNAME}"),
