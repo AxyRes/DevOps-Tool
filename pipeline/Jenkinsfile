@@ -42,15 +42,17 @@ pipeline{
         }
         stage('Stage 2 Prepare the package'){
             steps{
-                sh"""
-                    prepare_package () {
-                        app=$1
-                        package=${WORKSPACE}/packages/${PJNAME}.war
-                        cd ${WORKSPACE}/docker/$app
-                        sed -i "s|\\$package_file|$package|g" Dockerfile
-                    }
-                    [[ $PJ_admin == "true" ]] && prepare_package admin
-                """
+                script{
+                    sh"""
+                        prepare_package () {
+                            app=$1
+                            package=${WORKSPACE}/packages/${PJNAME}.war
+                            cd ${WORKSPACE}/docker/$app
+                            sed -i "s|\\$package_file|$package|g" Dockerfile
+                        }
+                        [[ $PJ_admin == "true" ]] && prepare_package admin
+                    """
+                }
             }
         }
         stage('Stage 3 Build Docker Image'){
