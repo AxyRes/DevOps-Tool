@@ -91,6 +91,7 @@ pipeline{
         always{
             echo 'One way or another, I have finished'
             deleteDir()
+            sendEmail()
         }
         success {
             emailext(
@@ -124,4 +125,44 @@ pipeline{
 }
 String determineRepoName() {
     return scm.getUserRemoteConfigs()[0].getUrl().tokenize('/').last().split("\\.")[0]
+}
+def sendEmail() {
+    def url = "https://api.sendgrid.com/v3/mail/send"
+    def apiKey = "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"
+    def from = "nhattien.lam.545@gmail.com"
+    def to = "tien.lamnhat2308@gmail.com"
+    def subject = "Test Email"
+    def body = "This is a test email sent from Jenkins pipeline using SendGrid API."
+
+    def payload = """
+        {
+            "personalizations": [
+                {
+                    "to": [
+                        {
+                            "email": "${to}"
+                        }
+                    ]
+                }
+            ],
+            "from": {
+                "email": "${from}"
+            },
+            "subject": "${subject}",
+            "content": [
+                {
+                    "type": "text/plain",
+                    "value": "${body}"
+                }
+            ]
+        }
+    """
+
+    sh """
+        curl -X POST \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer ${apiKey}" \
+        -d '${payload}' \
+        '${url}'
+    """
 }
