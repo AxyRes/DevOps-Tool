@@ -4,7 +4,7 @@ pipeline{
         docker {
             image 'axyres/dockercentos:1.0'
             args '--privileged --user=0 -v $WORKSPACE:/tmp/sbapp -w /tmp/sbapp'
-            command 'bash', '-c', 'systemctl start docker && ./your_script.sh'
+            command 'bash -c "systemctl start docker"'
             reuseNode true
         }
     }
