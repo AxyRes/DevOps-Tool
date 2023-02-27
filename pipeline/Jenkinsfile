@@ -68,7 +68,7 @@ pipeline{
                             docker volume rm webapps || true
                             docker volume create webapps
                             [[ $Start_container == "true" ]] && start_container="" && detach="-d"
-                            cd ${WORKSPACE}/docker && docker-compose up $detach --force-recreate --build $start_containers $1
+                            cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $1
                         }
                         [[ $PJ_admin == "true" ]] && build_docker admin
                     """
