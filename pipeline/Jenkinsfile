@@ -13,7 +13,7 @@ pipeline{
         Branch="dev"
         CredentialID="credential_axyres_github"
         CredentialID_Nexus="credential_nexus_admin"
-        CredentialID_Telegram="credential_telegram_axyres"
+        ChatID_Telegram="5595929242"
         gitRepo="https://github.com/AxyRes/Quiz-Online.git"
     }
     stages{
@@ -92,19 +92,18 @@ pipeline{
         always{
             echo 'One way or another, I have finished'
             deleteDir()
-            sendEmail()
         }
         success {
             telegramSend (
-                message: "The build has succeeded!",
-                chatId: 5595929242
+                message: "[SUCCESS] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}",
+                chatId: ${ChatID_Telegram}
             )
         }
 
         failure {
             telegramSend (
-                message: "The build has failure!",
-                chatId: 5595929242
+                message: "[FAILED] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}",
+                chatId: ${ChatID_Telegram}
             )
         }
     }
