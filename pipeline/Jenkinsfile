@@ -70,7 +70,7 @@ pipeline{
                 }
             }
         }
-        stage('Stage 6 Trigger build job image') {
+        stage('Stage 6 Trigger build job ${PJNAME} image') {
             steps {
                 script {
                     build job: "Quiz-Online-Dev-Image", parameters: [
