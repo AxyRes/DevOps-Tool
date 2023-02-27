@@ -102,7 +102,6 @@ pipeline{
                 }
             }
         }
-    }
     post {
         always{
             echo 'One or anthor ways, I have finined'
@@ -110,6 +109,7 @@ pipeline{
         }
     }
 }
+
 String determineRepoName() {
     return scm.getUserRemoteConfigs()[0].getUrl().tokenize('/').last().split("\\.")[0]
 }
