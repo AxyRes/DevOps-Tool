@@ -33,7 +33,6 @@ pipeline{
         stage('Stage 3 Get commit harsh'){
             steps{
                 sh"""
-                    yum install git -y
                     cd ${WORKSPACE}/
                     echo "${PJNAME}" > ${WORKSPACE}/commit.txt
                     /bin/git log -1 --pretty=format:'%h, %an, %ar, %aD, %s' >> ${WORKSPACE}/commit.txt
