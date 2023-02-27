@@ -2,7 +2,7 @@
 pipeline{
     agent{
         docker {
-            image 'axyres/dockercentos:1.0'
+            image 'axyres/dockercentos:1.1'
             args '--privileged --user=0 -v $WORKSPACE:/tmp/sbapp -w /tmp/sbapp'
             reuseNode true
         }
