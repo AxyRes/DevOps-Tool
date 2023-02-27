@@ -28,7 +28,6 @@ pipeline{
                         mkdir -p packages/
                         rm -rf packages/*
                         cd packages/
-                        docker ps -a
                         echo Start download package
                         if [ $PJ_admin == true ]
                         then
