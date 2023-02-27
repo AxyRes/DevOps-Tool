@@ -45,7 +45,8 @@ pipeline{
                     sh'''
                         prepare_package () {
                             app=$1
-                            package=${WORKSPACE}/packages/${PJNAME}.war
+                            package=${PJNAME}.war
+                            cp -f ${WORKSPACE}/packages/${PJNAME}.war ${WORKSPACE}/docker/$app/${PJNAME}.war
                             cd ${WORKSPACE}/docker/$app
                             sed -i "s|\\$package_file|$package|g" Dockerfile
                         }
