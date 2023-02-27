@@ -92,7 +92,7 @@ pipeline{
             echo 'One way or another, I have finished'
             deleteDir()
         }
-        sucess {
+        success {
             emailext(
                 subject: "[SUCCESS] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}",
                 body: '''
@@ -100,11 +100,11 @@ pipeline{
                     <p>Please review <strong><u>your change</u></strong> below:</p>
                     <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div>}
                 ''',
-                mineType: 'text/html',
+                mimeType: 'text/html',
                 to: "nhattien.lam.454@gmail.com"
             )
         }
-        failture{
+        failure{
             emailext(
                 subject: "[FAILED] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}",
                 body: '''
@@ -112,7 +112,7 @@ pipeline{
                     <p>Please review <strong><u>your change</u></strong> below:</p>
                     <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div>}
                 ''',
-                mineType: 'text/html',
+                mimeType: 'text/html',
                 to: "nhattien.lam.454@gmail.com"
             )
         }
