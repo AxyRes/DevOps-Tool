@@ -81,7 +81,7 @@ pipeline{
                         booleanParam(name: 'PJ_admin', value: 'true'),
                         booleanParam(name: 'Start_container', value: 'true'),
                         booleanParam(name: 'Push_images_to_Hub', value: 'ture')
-                    ].
+                    ],
                     wait: true
                 }
             }
