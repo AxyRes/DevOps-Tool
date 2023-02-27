@@ -13,6 +13,7 @@ pipeline{
         Branch="dev"
         CredentialID="credential_axyres_github"
         CredentialID_Nexus="credential_nexus_admin"
+        CredentialID_Telegram="credential_telegram_axyres"
         gitRepo="https://github.com/AxyRes/Quiz-Online.git"
     }
     stages{
@@ -94,75 +95,21 @@ pipeline{
             sendEmail()
         }
         success {
-            emailext(
-                subject: "[BUILD SUCCESS] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}",
-                body: '''
-                    <p>Hi All,</p>
-                    <p> *** This is an automatically generated email. Please do not reply ***</p>
-                    <p>Please review <strong><u>your change</u></strong> below:</p>
-                    <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div><div style=\\"padding-left:30px;\\"> &#8212; &#8220;<em>%r</em>&#8221;</div>", pathFormat="</div><div style=\\"padding-left:30px;\\">%p"}</p>
-                ''',
-                mimeType: 'text/html',
-                to: "nhattien.lam.454@gmail.com",
-                replyTo:'jenkins-notification@gmail.com'
-            )
+            withCredentials([usernamePassword(credentialsId: "$CredentialID_Telegram", passwordVariable:'TELEGRAM_PASSWORD', usernameVariable:'TELEGRAM_USER')]) {
+                telegramSend message: "The build of ${PJNAME} has success!",
+                chatId: 'TELEGRAM_USER',
+                tokenCredentialId: 'TELEGRAM_PASSWORD'
+            }
         }
         failure{
-            emailext(
-                subject: "[BUILD FAILED] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}",
-                body: '''
-                    <p>Hi All,</p>
-                    <p> *** This is an automatically generated email. Please do not reply ***</p>
-                    <p>Please review <strong><u>your change</u></strong> below:</p>
-                    <p>${CHANGES, showPaths=true, format="<div><b style=\\"color:blue;\\">%a: %m</b>: %d %p </div><div style=\\"padding-left:30px;\\"> &#8212; &#8220;<em>%r</em>&#8221;</div>", pathFormat="</div><div style=\\"padding-left:30px;\\">%p"}</p>
-                ''',
-                mimeType: 'text/html',
-                to: "nhattien.lam.454@gmail.com",
-                replyTo:'jenkins-notification@gmail.com'
-            )
+            withCredentials([usernamePassword(credentialsId: "$CredentialID_Telegram", passwordVariable:'TELEGRAM_PASSWORD', usernameVariable:'TELEGRAM_USER')]) {
+                telegramSend message: "The build of ${PJNAME} has failure!",
+                chatId: 'TELEGRAM_USER',
+                tokenCredentialId: 'TELEGRAM_PASSWORD'
+            }
         }
     }
 }
 String determineRepoName() {
     return scm.getUserRemoteConfigs()[0].getUrl().tokenize('/').last().split("\\.")[0]
-}
-def sendEmail() {
-    def url = "https://api.sendgrid.com/v3/mail/send"
-    def apiKey = "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"
-    def from = "nhattien.lam.545@gmail.com"
-    def to = "tien.lamnhat2308@gmail.com"
-    def subject = "Test Email"
-    def body = "This is a test email sent from Jenkins pipeline using SendGrid API."
-
-    def payload = """
-        {
-            "personalizations": [
-                {
-                    "to": [
-                        {
-                            "email": "${to}"
-                        }
-                    ]
-                }
-            ],
-            "from": {
-                "email": "${from}"
-            },
-            "subject": "${subject}",
-            "content": [
-                {
-                    "type": "text/plain",
-                    "value": "${body}"
-                }
-            ]
-        }
-    """
-
-    sh """
-        curl -X POST \
-        -H "Content-Type: application/json" \
-        -H "Authorization: Bearer ${apiKey}" \
-        -d '${payload}' \
-        '${url}'
-    """
 }
