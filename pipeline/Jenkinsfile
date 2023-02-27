@@ -6,12 +6,16 @@ pipeline{
             args '--user=0 -v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '8', artifactNumToKeepStr: '8', daysToKeepStr: '7', artifactDaysToKeepStr: '7'))
+    }
     environment {
         Branch="dev"
         CredentialID="credential_docker_axyreshub"
         CredentialID_Nexus="credential_nexus_admin"
         Tag="1.0"
         image1="admin"
+        RepoDockerHub="axyres"
     }
     parameters {
         string(name: "buildVersion", defaultValue: '', description: 'Build Version')
@@ -93,8 +97,8 @@ pipeline{
                                 if [ $Push_images_to_Hub == "true" ]
                                 then
                                     echo Start Push image to Docker Hub
-                                    docker tag $image axyres/$app-${buildBranch}:$Tag-${buildVersion}
-                                    docker push axyres/$app-${buildBranch}:$Tag-${buildVersion}
+                                    docker tag $image ${RepoDockerHub}/$app-${buildBranch}:$Tag-${buildVersion}
+                                    docker push ${RepoDockerHub}/$app-${buildBranch}:$Tag-${buildVersion}
                                 fi
                             }
                             [[ $PJ_admin == "true" ]] && upload_docker_images_to_Hub $image1:$Tag quizonline
