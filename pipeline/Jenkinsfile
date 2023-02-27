@@ -1,6 +1,11 @@
 #!groovy?
 pipeline{
-    agent any
+    agent{
+        docker {
+            image 'axyres/dockercentos:1.1'
+            args '--user=0 -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
     environment {
         Branch="dev"
         CredentialID="credential_docker_axyreshub"
@@ -23,7 +28,7 @@ pipeline{
                         mkdir -p packages/
                         rm -rf packages/*
                         cd packages/
-
+                        docker ps -a
                         echo Start download package
                         if [ $PJ_admin == true ]
                         then
