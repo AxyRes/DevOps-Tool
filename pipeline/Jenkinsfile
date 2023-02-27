@@ -61,7 +61,7 @@ pipeline{
         stage('Stage 5 Upload to Nexus Repository') {
             steps{
                 scrpit{
-                    withCredentials([usernamePassword(credentialsId: "$CredentialID_Nexus"), passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER']){
+                    withCredentials([usernamePassword(credentialsId: "$CredentialID_Nexus", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
                         sh"""
                             echo Start Push pakage to Artifactory ......
                             curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/latest/${PJNAME}-${Version}.war"
