@@ -2,7 +2,7 @@
 pipeline{
     agent{
         docker {
-            image 'maven:3.8.6-amazoncorretto-17'
+            image 'axyres/dockercentos:1.0'
             args '--user=0 -v $WORKSPACE:/tmp/sbapp -w /temp/sbapp'
             reuseNode true
         }
@@ -60,6 +60,7 @@ pipeline{
             steps{
                 script{
                     sh'''
+                        echo Start Build Docker Image
                         build_docker () {
                             service=$1
                             start_containers="--no-start"
@@ -74,6 +75,7 @@ pipeline{
                             cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $1
                         }
                         [[ $PJ_admin == "true" ]] && build_docker admin
+                        echo End Build Docker Images
                     '''
                 }
             }
