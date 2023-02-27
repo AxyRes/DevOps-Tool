@@ -49,10 +49,6 @@ pipeline{
                         echo 'Start Build Code'
                         mvn clean install -DskipTests=true -U -Dversion=${Version}
 
-                        cd ${WORKSPACE}
-                        rm -f report-${PJNAME}.zip
-                        /usr/bin/zip -r report.zip ReportOut
-
                         echo 'End Build Code'
                     """
                 }
@@ -64,11 +60,10 @@ pipeline{
                     withCredentials([usernamePassword(credentialsId: "$CredentialID_Nexus", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
                         sh"""
                             echo Start Push pakage to Artifactory ......
+
                             curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/latest/${PJNAME}-${Version}.war"
                             curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war"
 
-                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/report-${PJNAME}.zip" "http://192.168.1.2/nexus/repository/maven-snapshots/report/${PJNAME}/${Branch}/latest/report-${PJNAME}.zip"
-                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/report-${PJNAME}.zip" "http://192.168.1.2/nexus/repository/maven-snapshots/report/${PJNAME}/${Branch}/${buildVersion}/report-${PJNAME}.zip"
                             echo End Upload package ......
                         """
                     }
