@@ -1,0 +1,96 @@
+#!groovy?
+pipeline{
+    agent{
+        docker {
+            image 'maven:3.8.6-amazoncorretto-17'
+            args '--user=0 -v $WORKSPACE:/tmp/sbapp -w /temp/sbapp'
+            reuseNode true
+        }
+    }
+    environment {
+        Branch="dev"
+        CredentialID="credential_docker_axyreshub"
+    }
+    parameters {
+        string(name: "buildVersion", defaultValue: '', description: 'Build Version')
+        string(name: "buildBranch", defaultValue: '', description: 'Build Branch')
+        string(name: "PJNAME", defaultValue: '', description: 'Project Name')
+        string(name: "Version", defaultValue: '', description: 'Version Project')
+        booleanParam(name: 'PJ_admin', defaultValue: 'false', description: 'Build Admin Image')
+        booleanParam(name: 'Start_container', defaultValue: 'false', description: 'Start container')
+        booleanParam(name: 'Push_images_to_Hub', defaultValue: 'false', description: 'Push images to AxyResHub')
+    }
+    stages{
+        stage('Stage 1 Get Package from artifactory'){
+            steps{
+                withCredentials([usernamePassword(credentialsId: "$CredentialID_Nexus", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
+                    sh """
+                        mkdir -p packages/
+                        rm -rf packages/*
+                        cd packages/
+
+                        echo Start download package
+                        if [ $PJ_admin == true ]
+                        then
+                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war
+                            mv ${PJNAME}-${Version}.war ${PJNAME}.war
+                        fi
+                        echo Done download package
+                    """
+                }
+            }
+        }
+        stage('Stage 2 Prepare the package'){
+            steps{
+                sh"""
+                    prepare_package () {
+                        app=$1
+                        package=${WORKSPACE}/packages/${PJNAME}.war
+                        cd ${WORKSPACE}/docker/$app
+                        sed -i "s|\\$package_file|$package|g" Dockerfile
+                    }
+                    [[ $PJ_admin == "true" ]] && prepare_package admin
+                """
+            }
+        }
+        stage('Stage 3 Build Docker Image'){
+            steps{
+                script{
+                    sh"""
+                        build_docker () {
+                            service=$1
+                            start_containers="--no-start"
+                            detach=""
+                            container_name="$(echo $service | tr - _)"
+
+                            docker rm -f $container_name || true
+                            docker rmi -f pj_$container_name || true
+                            docker volume rm webapps || true
+                            docker volume create webapps
+                            [[ $Start_container == "true" ]] && start_container="" && detach="-d"
+                            cd ${WORKSPACE}/docker && docker-compose up $detach --force-recreate --build $start_containers $1
+                        }
+                        [[ $PJ_admin == "true" ]] && build_docker admin
+                    """
+                }
+            }
+        }
+        stage('Stage 5 Upload to Nexus Repository') {
+            steps{
+                script{
+                    withCredentials([usernamePassword(credentialsId: "$CredentialID_Nexus", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
+                        sh"""
+                            echo Start Push pakage to Artifactory ......
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/latest/${PJNAME}-${Version}.war"
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war"
+                            echo End Upload package ......
+                        """
+                    }
+                }
+            }
+        }
+    }
+}
+String determineRepoName() {
+    return scm.getUserRemoteConfigs()[0].getUrl().tokenize('/').last().split("\\.")[0]
+}

@@ -1,0 +1,16 @@
+version: "2.0"
+services:
+  admin:
+    build: docker/admin/.
+    image: admin
+    container_name: admin
+    ports:
+      - "18080:8080"
+    environment:
+      - INIT_MEM=2048m
+      - MAX_MEM=4096m
+    volumes:
+      - webapps:/usr/local/tomcat/webapps
+volumes:
+  webapps:
+    external: true
