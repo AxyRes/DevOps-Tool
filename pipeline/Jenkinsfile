@@ -46,7 +46,6 @@ pipeline{
             steps{
                 script{
                     sh'''
-                        systemctl start docker
                         prepare_package () {
                             app=$1
                             package=${WORKSPACE}/packages/${PJNAME}.war
