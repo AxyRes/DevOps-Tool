@@ -84,7 +84,7 @@ pipeline{
                 script{
                     withCredentials([usernamePassword(credentialsId: "$CredentialID", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
                         sh '''
-                            docker login -u $ARTIFACTORY_USER -p $ARTIFACTORY_PASSWORD
+                            docker login -u ${ARTIFACTORY_USER} -p ${ARTIFACTORY_PASSWORD}
                             upload_docker_images_to_Hub () {
                                 image=$1
                                 app=$2
