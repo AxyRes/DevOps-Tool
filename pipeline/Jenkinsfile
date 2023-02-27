@@ -3,7 +3,8 @@ pipeline{
     agent{
         docker {
             image 'axyres/dockercentos:1.0'
-            args '--user=0 -v $WORKSPACE:/tmp/sbapp -w /temp/sbapp'
+            args '--privileged --user=0 -v $WORKSPACE:/tmp/sbapp -w /tmp/sbapp'
+            command 'bash', '-c', 'systemctl start docker && ./your_script.sh'
             reuseNode true
         }
     }
