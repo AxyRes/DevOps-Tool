@@ -5,7 +5,6 @@ pipeline{
             image 'axyres/dockercentos:1.0'
             args '--privileged --user=0 -v $WORKSPACE:/tmp/sbapp -w /tmp/sbapp'
             reuseNode true
-            sh 'systemctl start docker'
         }
     }
     environment {
