@@ -20,6 +20,7 @@ pipeline{
         stage('Stage 1 Getting build number'){
             steps{
                 script{
+                    telegramSend(message: 'Hello Start Build Job ${PJNAME}', chatId: "$ChatID_Telegram")
                     def now = new Date()
 					buildVersion =  now.format("yyyy.MM.dd.HHmm", TimeZone.getTimeZone('UTC'))
 					currentBuild.displayName = "${buildVersion}"
