@@ -95,15 +95,19 @@ pipeline{
             sendEmail()
         }
         success {
-            telegramSend message: "The build has succeeded!",
+            telegramSend (
+                message: "The build has succeeded!",
                 chatId: '5595929242',
-                tokenCredentialId: '$CredentialID_Telegram'
+                botToken: '6144187064:AAGs78UME422-nU-5qkWIbgZyCe6L3YNz8w'
+            )
         }
 
         failure {
-            telegramSend message: "The build has failed!",
+            telegramSend (
+                message: "The build has failure!",
                 chatId: '5595929242',
-                tokenCredentialId: '$CredentialID_Telegram'
+                botToken: '6144187064:AAGs78UME422-nU-5qkWIbgZyCe6L3YNz8w'
+            )
         }
     }
 }
