@@ -20,7 +20,6 @@ pipeline{
         stage('Stage 1 Getting build number'){
             steps{
                 script{
-                    telegramSend(message: 'Hello Start Build Job ${PJNAME}', chatId: "$ChatID_Telegram")
                     def now = new Date()
 					buildVersion =  now.format("yyyy.MM.dd.HHmm", TimeZone.getTimeZone('UTC'))
 					currentBuild.displayName = "${buildVersion}"
@@ -29,13 +28,11 @@ pipeline{
         }
         stage('Stage 2 Checkout Code'){
             steps{
-                telegramSend(message: 'Hello Start Build Job ${PJNAME}', chatId: "$ChatID_Telegram")
                 checkout([$class: 'GitSCM', branches: [[name: "$Branch"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CheckoutOption', timeout: 90], [$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false, timeout: 90], [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', timeout: 90, trackingSubmodules: true]], gitTool: 'Default', submoduleCfg: [], userRemoteConfigs: [[credentialsId: "$CredentialID", url: "$gitRepo"]]])
             }
         }
         stage('Stage 3 Get commit harsh'){
             steps{
-                telegramSend(message: 'Hello Start Build Job ${PJNAME}', chatId: "$ChatID_Telegram")
                 sh"""
                     yum install git zip unzip -y
                     cd ${WORKSPACE}/
@@ -97,11 +94,11 @@ pipeline{
             deleteDir()
         }
         success {
-            telegramSend message: "[SUCCESS] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}", chatId: "${ChatID_Telegram}"
+            telegramSend (message: "[SUCCESS] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}", chatId: "${ChatID_Telegram}")
         }
 
         failure {
-            telegramSend message: "[FAILED] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}", chatId: "${ChatID_Telegram}"
+            telegramSend (message: "[FAILED] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}", chatId: "${ChatID_Telegram}")
         }
     }
 }
