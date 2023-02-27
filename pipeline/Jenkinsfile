@@ -70,6 +70,22 @@ pipeline{
                 }
             }
         }
+        stage('Stage 6 Trigger build job image') {
+            steps {
+                script {
+                    build job: "Quiz-Online-Dev-Image", parameters [
+                        string(name: "buildVersion", value: "${buildVersion}"),
+                        string(name: "buildBranch", value: "${Branch}"),
+                        string(name: "PJNAME", value: "${PJNAME}"),
+                        string(name: "Version", value: "${Version}"),
+                        booleanParam(name: 'PJ_admin', value: 'true'),
+                        booleanParam(name: 'Start_container', value: 'true'),
+                        booleanParam(name: 'Push_images_to_Hub', value: 'ture')
+                    ].
+                    wait: true
+                }
+            }
+        }
     }
 }
 String determineRepoName() {
