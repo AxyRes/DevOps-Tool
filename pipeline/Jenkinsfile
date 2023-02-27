@@ -9,9 +9,10 @@ pipeline{
     }
     environment {
         Version="1.0-SNAPSHOT"
-        PJNAME="Quiz-Online"
+        PJNAME="QuizOnline"
         Branch="dev"
         CredentialID="credential_axyres_github"
+        CredentialID_Nexus="credential_nexus_admin"
         gitRepo="https://github.com/AxyRes/Quiz-Online.git"
     }
     stages{
@@ -29,19 +30,19 @@ pipeline{
                 checkout([$class: 'GitSCM', branches: [[name: "$Branch"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CheckoutOption', timeout: 90], [$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false, timeout: 90], [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', timeout: 90, trackingSubmodules: true]], gitTool: 'Default', submoduleCfg: [], userRemoteConfigs: [[credentialsId: "$CredentialID", url: "$gitRepo"]]])
             }
         }
-        /*stage('Stage 3 Get commit harsh'){
+        stage('Stage 3 Get commit harsh'){
             steps{
                 sh"""
                     yum install git -y
                     cd ${WORKSPACE}/
                     echo "${PJNAME}" > ${WORKSPACE}/commit.txt
-                    git log -1 --pretty=format:'%h, %an, %ar, %aD, %s' >> ${WORKSPACE}/commit.txt
+                    /bin/git log -1 --pretty=format:'%h, %an, %ar, %aD, %s' >> ${WORKSPACE}/commit.txt
 					echo "\n############################################" >> ${WORKSPACE}/commit.txt
 
                 """
             }
-        }*/
-        stage('Stage 3 Build Code'){
+        }
+        stage('Stage 4 Build Code'){
             steps{
                 script{
                     sh"""
@@ -49,15 +50,31 @@ pipeline{
                         mvn clean install -DskipTests=true -U -Dversion=${Version}
 
                         cd ${WORKSPACE}
-                        rm -f report.zip
-                        zip -r report.zip ReportOut
+                        rm -f report-${PJNAME}.zip
+                        /usr/bin/zip -r report.zip ReportOut
 
                         echo 'End Build Code'
                     """
                 }
             }
         }
-        /*stage('Stage 4 Upload to Nexus Repository')*/
+        stage('Stage 5 Upload to Nexus Repository') {
+            steps{
+                scrpit{
+                    withCredentials([usernamePassword(credentialsId: "$CredentialID_Nexus"), passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER']){
+                        sh"""
+                            echo Start Push pakage to Artifactory ......
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/latest/${PJNAME}-${Version}.war"
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war"
+
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/report-${PJNAME}.zip" "http://192.168.1.2/nexus/repository/maven-snapshots/report/${PJNAME}/${Branch}/latest/report-${PJNAME}.zip"
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/report-${PJNAME}.zip" "http://192.168.1.2/nexus/repository/maven-snapshots/report/${PJNAME}/${Branch}/${buildVersion}/report-${PJNAME}.zip"
+                            echo End Upload package ......
+                        """
+                    }
+                }
+            }
+        }
     }
 }
 String determineRepoName() {
