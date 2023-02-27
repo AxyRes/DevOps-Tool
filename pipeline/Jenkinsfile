@@ -94,11 +94,11 @@ pipeline{
             deleteDir()
         }
         success {
-            telegramSend (message: "[SUCCESS] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}", chatId: "${ChatID_Telegram}")
+            telegramSend (message: "[SUCCESS] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion", chatId: "${ChatID_Telegram}")
         }
 
         failure {
-            telegramSend (message: "[FAILED] - PROJECT: ${PJNAME} - BRANCH: ${Branch} - VERSION: ${buildVersion}", chatId: "${ChatID_Telegram}")
+            telegramSend (message: "[FAILED] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion", chatId: "${ChatID_Telegram}")
         }
     }
 }
