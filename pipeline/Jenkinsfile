@@ -22,6 +22,8 @@ pipeline{
         string(name: "buildBranch", defaultValue: '', description: 'Build Branch')
         string(name: "PJNAME", defaultValue: '', description: 'Project Name')
         string(name: "Version", defaultValue: '', description: 'Version Project')
+        string(name: "Nexus_URL", defaultValue: '', description: 'URL of Atifactory')
+        string(name: "Repository_Nexus", defaultValue: '', description: 'Repository of artifactory')
         booleanParam(name: 'PJ_admin', defaultValue: 'false', description: 'Build Admin Image')
         booleanParam(name: 'Start_container', defaultValue: 'false', description: 'Start container')
         booleanParam(name: 'Push_images_to_Hub', defaultValue: 'false', description: 'Push images to AxyResHub')
@@ -37,7 +39,7 @@ pipeline{
                         echo Start download package
                         if [ $PJ_admin == true ]
                         then
-                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war
+                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O ${Nexus_URL}/${Repository_Nexus}/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war
                             mv ${PJNAME}-${Version}.war ${PJNAME}.war
                         fi
                         echo Done download package
