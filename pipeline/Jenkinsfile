@@ -97,7 +97,6 @@ pipeline{
     post{
         always{
             echo 'One way or another, I have finished'
-            deleteDir()
         }
         success {
             echo 'I success'
@@ -105,6 +104,7 @@ pipeline{
                 def commitMsg = readFile "${WORKSPACE}/commit.txt"
                 telegramSend (message: """[BUILD SUCCESS] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion - COMMIT MESSAGE: $commitMsg""", chatId: "${ChatID_Telegram}")
             }
+            deleteDir()
         }
         failure {
             echo 'I failure'
@@ -112,6 +112,7 @@ pipeline{
                 def commitMsg = readFile "${WORKSPACE}/commit.txt"
                 telegramSend (message: """[BUILD FAILED] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion - COMMIT MESSAGE: $commitMsg""", chatId: "${ChatID_Telegram}")
             }
+            deleteDir()
         }
     }
 }
