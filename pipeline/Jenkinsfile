@@ -18,6 +18,8 @@ pipeline{
         CredentialID_Nexus="credential_nexus_admin"
         ChatID_Telegram="5595929242"
         gitRepo="https://github.com/AxyRes/Quiz-Online.git"
+        URL_Nexus="http://192.168.1.2/nexus/repository"
+        Repository_Nexus="maven-snapshots"
     }
     stages{
         stage('Stage 1 Getting build number'){
@@ -64,8 +66,8 @@ pipeline{
                         sh"""
                             echo Start Push pakage to Artifactory ......
 
-                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/latest/${PJNAME}-${Version}.war"
-                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war"
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "${URL_Nexus}/${Repository_Nexus}/admin/${PJNAME}/${Branch}/latest/${PJNAME}-${Version}.war"
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "${URL_Nexus}/${Repository_Nexus}/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war"
 
                             echo End Upload package ......
                         """
@@ -97,12 +99,14 @@ pipeline{
         }
         success {
             echo 'I success'
-            telegramSend (message: """[BUILD SUCCESS] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion""", chatId: "${ChatID_Telegram}")
+            def commitMsg = readFile "${WORKSPACE}/commit.txt"
+            telegramSend (message: """[BUILD SUCCESS] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion - COMMIT MESSAGE: $commitMsg""", chatId: "${ChatID_Telegram}")
         }
 
         failure {
             echo 'I failure'
-            telegramSend (message: """[BUILD FAILED] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion""", chatId: "${ChatID_Telegram}")
+            def commitMsg = readFile "${WORKSPACE}/commit.txt"
+            telegramSend (message: """[BUILD FAILED] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion - COMMIT MESSAGE: $commitMsg""", chatId: "${ChatID_Telegram}")
         }
     }
 }
