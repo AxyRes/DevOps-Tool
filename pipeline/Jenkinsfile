@@ -83,6 +83,8 @@ pipeline{
                         string(name: "buildBranch", value: "${Branch}"),
                         string(name: "PJNAME", value: "${PJNAME}"),
                         string(name: "Version", value: "${Version}"),
+                        string(name: "Nexus_URL", value: "${URL_Nexus}"),
+                        string(name: "Repository_Nexus", value: "${Repository_Nexus}"),
                         booleanParam(name: 'PJ_admin', value: 'true'),
                         booleanParam(name: 'Start_container', value: 'true'),
                         booleanParam(name: 'Push_images_to_Hub', value: 'true')
