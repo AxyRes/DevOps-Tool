@@ -1,8 +1,8 @@
 version: "2.0"
 services:
   quizonline:
-    build: QuizOnline/Dockerfile/.
-    image: admin:1.0
+    build: quizonline/dockerfile/.
+    image: quizonline:1.0
     container_name: quizonline
     ports:
       - "18080:8080"
