@@ -1,0 +1,16 @@
+version: "2.0"
+services:
+  admin:
+    build: app/dockerfile/.
+    image: admin:1.0
+    container_name: quizonline
+    ports:
+      - "18080:8080"
+    environment:
+      - INIT_MEM=2048m
+      - MAX_MEM=4096m
+    volumes:
+      - webapps:/usr/local/tomcat/webapps
+volumes:
+  webapps:
+    external: true

@@ -22,6 +22,8 @@ pipeline{
         string(name: "buildBranch", defaultValue: '', description: 'Build Branch')
         string(name: "PJNAME", defaultValue: '', description: 'Project Name')
         string(name: "Version", defaultValue: '', description: 'Version Project')
+        string(name: "Nexus_URL", defaultValue: '', description: 'URL of Atifactory')
+        string(name: "Repository_Nexus", defaultValue: '', description: 'Repository of artifactory')
         booleanParam(name: 'PJ_admin', defaultValue: 'false', description: 'Build Admin Image')
         booleanParam(name: 'Start_container', defaultValue: 'false', description: 'Start container')
         booleanParam(name: 'Push_images_to_Hub', defaultValue: 'false', description: 'Push images to AxyResHub')
@@ -37,7 +39,7 @@ pipeline{
                         echo Start download package
                         if [ $PJ_admin == true ]
                         then
-                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war
+                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O ${Nexus_URL}/${Repository_Nexus}/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war
                             mv ${PJNAME}-${Version}.war ${PJNAME}.war
                         fi
                         echo Done download package
@@ -52,11 +54,11 @@ pipeline{
                         prepare_package () {
                             app=$1
                             package=${PJNAME}.war
-                            cp -f ${WORKSPACE}/packages/${PJNAME}.war ${WORKSPACE}/docker/$app/${PJNAME}.war
-                            cd ${WORKSPACE}/docker/$app
+                            cp -f ${WORKSPACE}/packages/${PJNAME}.war ${WORKSPACE}/docker/$app/dockerfile/${PJNAME}.war
+                            cd ${WORKSPACE}/docker/$app/dockerfile/
                             sed -i "s|\\$package_file|$package|g" Dockerfile
                         }
-                        [[ $PJ_admin == "true" ]] && prepare_package admin
+                        [[ $PJ_admin == "true" ]] && prepare_package $image1
                     '''
                 }
             }
@@ -78,7 +80,7 @@ pipeline{
                             [[ $Start_container == "true" ]] && start_containers="" && detach="--detach"
                             cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $1
                         }
-                        [[ $PJ_admin == "true" ]] && build_docker admin
+                        [[ $PJ_admin == "true" ]] && build_docker $image1
                         echo End Build Docker Images
                     '''
                 }
@@ -92,15 +94,14 @@ pipeline{
                             docker login -u ${ARTIFACTORY_USER} -p ${ARTIFACTORY_PASSWORD}
                             upload_docker_images_to_Hub () {
                                 image=$1
-                                app=$2
                                 if [ $Push_images_to_Hub == "true" ]
                                 then
                                     echo Start Push image to Docker Hub
-                                    docker tag $image ${RepoDockerHub}/$app-${buildBranch}:$Tag-${buildVersion}
-                                    docker push ${RepoDockerHub}/$app-${buildBranch}:$Tag-${buildVersion}
+                                    docker tag $image ${RepoDockerHub}/$image1-${buildBranch}:$Tag-${buildVersion}
+                                    docker push ${RepoDockerHub}/$image1-${buildBranch}:$Tag-${buildVersion}
                                 fi
                             }
-                            [[ $PJ_admin == "true" ]] && upload_docker_images_to_Hub $image1:$Tag quizonline
+                            [[ $PJ_admin == "true" ]] && upload_docker_images_to_Hub $image1:$Tag
                         '''
                     }
                 }
