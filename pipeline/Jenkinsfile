@@ -98,8 +98,8 @@ pipeline{
                                 if [ $Push_images_to_Hub == "true" ]
                                 then
                                     echo Start Push image to Docker Hub
-                                    docker tag $image ${RepoDockerHub}/$image-${buildBranch}:$Tag-${buildVersion}
-                                    docker push ${RepoDockerHub}/$image-${buildBranch}:$Tag-${buildVersion}
+                                    docker tag $image ${RepoDockerHub}/$image1-${buildBranch}:$Tag-${buildVersion}
+                                    docker push ${RepoDockerHub}/$image1-${buildBranch}:$Tag-${buildVersion}
                                 fi
                             }
                             [[ $PJ_admin == "true" ]] && upload_docker_images_to_Hub $image1:$Tag
