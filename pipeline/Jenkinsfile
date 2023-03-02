@@ -14,7 +14,7 @@ pipeline{
         CredentialID="credential_docker_axyreshub"
         CredentialID_Nexus="credential_nexus_admin"
         Tag="1.0"
-        image1="admin"
+        image1="quizonline"
         RepoDockerHub="axyres"
     }
     parameters {
@@ -54,11 +54,11 @@ pipeline{
                         prepare_package () {
                             app=$1
                             package=${PJNAME}.war
-                            cp -f ${WORKSPACE}/packages/${PJNAME}.war ${WORKSPACE}/docker/$app/${PJNAME}.war
-                            cd ${WORKSPACE}/docker/$app
+                            cp -f ${WORKSPACE}/packages/${PJNAME}.war ${WORKSPACE}/docker/$app/dockerfile/${PJNAME}.war
+                            cd ${WORKSPACE}/docker/$app/dockerfile/
                             sed -i "s|\\$package_file|$package|g" Dockerfile
                         }
-                        [[ $PJ_admin == "true" ]] && prepare_package admin
+                        [[ $PJ_admin == "true" ]] && prepare_package $image1
                     '''
                 }
             }
@@ -81,7 +81,7 @@ pipeline{
                             [[ $Start_container == "true" ]] && start_containers="" && detach="--detach"
                             cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $1
                         }
-                        [[ $PJ_admin == "true" ]] && build_docker admin
+                        [[ $PJ_admin == "true" ]] && build_docker $image1
                         echo End Build Docker Images
                     '''
                 }
@@ -95,15 +95,14 @@ pipeline{
                             docker login -u ${ARTIFACTORY_USER} -p ${ARTIFACTORY_PASSWORD}
                             upload_docker_images_to_Hub () {
                                 image=$1
-                                app=$2
                                 if [ $Push_images_to_Hub == "true" ]
                                 then
                                     echo Start Push image to Docker Hub
-                                    docker tag $image ${RepoDockerHub}/$app-${buildBranch}:$Tag-${buildVersion}
-                                    docker push ${RepoDockerHub}/$app-${buildBranch}:$Tag-${buildVersion}
+                                    docker tag $image ${RepoDockerHub}/$image-${buildBranch}:$Tag-${buildVersion}
+                                    docker push ${RepoDockerHub}/$image-${buildBranch}:$Tag-${buildVersion}
                                 fi
                             }
-                            [[ $PJ_admin == "true" ]] && upload_docker_images_to_Hub $image1:$Tag quizonline
+                            [[ $PJ_admin == "true" ]] && upload_docker_images_to_Hub $image1:$Tag
                         '''
                     }
                 }
