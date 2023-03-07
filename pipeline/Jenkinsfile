@@ -26,7 +26,7 @@ pipeline{
             steps{
                 script{
                     def now = new Date()
-					buildVersion =  now.format("yyyy.MM.dd.HHmm", TimeZone.getTimeZone('UTC'))
+					buildVersion =  now.format("yyyy.MM.dd.HHmm", TimeZone.getTimeZone('ICT'))
 					currentBuild.displayName = "${buildVersion}"
                 }
             }
@@ -75,7 +75,7 @@ pipeline{
                 }
             }
         }
-        stage('Stage 6 Trigger build job ${PJNAME} image') {
+        stage('Stage 6 Trigger build job image') {
             steps {
                 script {
                     build job: "Quiz-Online-Dev-Image", parameters: [
