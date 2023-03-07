@@ -21,13 +21,15 @@ pipeline{
         CredentialID_Nexus=""
         ChatID_Telegram=""
         gitRepo=""
+        URL_Nexus=""
+        Repository_Nexus=""
     }
     stages{
         stage('Stage 1 Getting build number'){
             steps{
                 script{
                     def now = new Date()
-					buildVersion =  now.format("yyyy.MM.dd.HHmm", TimeZone.getTimeZone('UTC'))
+					buildVersion =  now.format("yyyy.MM.dd.HHmm", TimeZone.getTimeZone('ICT'))
 					currentBuild.displayName = "${buildVersion}"
                 }
             }
@@ -64,15 +66,15 @@ pipeline{
                     withCredentials([usernamePassword(credentialsId: "$CredentialID_Nexus", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
                         sh"""
                             echo Start Push pakage to Artifactory ......
-                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/latest/${PJNAME}-${Version}.war"
-                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "http://192.168.1.2/nexus/repository/maven-snapshots/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war"
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "${URL_Nexus}/${Repository_Nexus}/admin/${PJNAME}/${Branch}/latest/${PJNAME}-${Version}.war"
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "${URL_Nexus}/${Repository_Nexus}/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war"
                             echo End Upload package ......
                         """
                     }
                 }
             }
         }
-        stage('Stage 6 Trigger build job ${PJNAME} image') {
+        stage('Stage 6 Trigger build job image') {
             steps {
                 script {
                     build job: "Quiz-Online-Dev-Image", parameters: [
@@ -80,6 +82,8 @@ pipeline{
                         string(name: "buildBranch", value: "${Branch}"),
                         string(name: "PJNAME", value: "${PJNAME}"),
                         string(name: "Version", value: "${Version}"),
+                        string(name: "Nexus_URL", value: "${URL_Nexus}"),
+                        string(name: "Repository_Nexus", value: "${Repository_Nexus}"),
                         booleanParam(name: 'PJ_admin', value: 'true'),
                         booleanParam(name: 'Start_container', value: 'true'),
                         booleanParam(name: 'Push_images_to_Hub', value: 'true')
@@ -92,16 +96,22 @@ pipeline{
     post{
         always{
             echo 'One way or another, I have finished'
-            deleteDir()
         }
         success {
             echo 'I success'
-            telegramSend (message: """[BUILD SUCCESS] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion""", chatId: "${ChatID_Telegram}")
+            script {
+                def commitMsg = readFile "${WORKSPACE}/commit.txt"
+                telegramSend (message: """[BUILD SUCCESS] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion - COMMIT MESSAGE: $commitMsg""", chatId: "${ChatID_Telegram}")
+            }
+            deleteDir()
         }
-
         failure {
             echo 'I failure'
-            telegramSend (message: """[BUILD FAILED] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion""", chatId: "${ChatID_Telegram}")
+            script{
+                def commitMsg = readFile "${WORKSPACE}/commit.txt"
+                telegramSend (message: """[BUILD FAILED] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion - COMMIT MESSAGE: $commitMsg""", chatId: "${ChatID_Telegram}")
+            }
+            deleteDir()
         }
     }
 }

@@ -10,11 +10,10 @@ pipeline{
         buildDiscarder(logRotator(numToKeepStr: '8', artifactNumToKeepStr: '8', daysToKeepStr: '7', artifactDaysToKeepStr: '7'))
     }
     environment {
-        Branch=""
         CredentialID=""
         CredentialID_Nexus=""
         Tag=""
-        image1=""
+        imagename=""
         RepoDockerHub=""
     }
     parameters {
@@ -39,7 +38,7 @@ pipeline{
                         echo Start download package
                         if [ $PJ_admin == true ]
                         then
-                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O ${Nexus_URL}/${Repository_Nexus}/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war
+                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O ${Nexus_URL}/${Repository_Nexus}/admin/${PJNAME}/${buildBranch}/${buildVersion}/${PJNAME}-${Version}.war
                             mv ${PJNAME}-${Version}.war ${PJNAME}.war
                         fi
                         echo Done download package
@@ -58,7 +57,7 @@ pipeline{
                             cd ${WORKSPACE}/docker/$app/dockerfile/
                             sed -i "s|\\$package_file|$package|g" Dockerfile
                         }
-                        [[ $PJ_admin == "true" ]] && prepare_package $image1
+                        [[ $PJ_admin == "true" ]] && prepare_package $imagename
                     '''
                 }
             }
@@ -80,7 +79,7 @@ pipeline{
                             [[ $Start_container == "true" ]] && start_containers="" && detach="--detach"
                             cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $1
                         }
-                        [[ $PJ_admin == "true" ]] && build_docker $image1
+                        [[ $PJ_admin == "true" ]] && build_docker $imagename
                         echo End Build Docker Images
                     '''
                 }
@@ -97,11 +96,11 @@ pipeline{
                                 if [ $Push_images_to_Hub == "true" ]
                                 then
                                     echo Start Push image to Docker Hub
-                                    docker tag $image ${RepoDockerHub}/$image1-${buildBranch}:$Tag-${buildVersion}
-                                    docker push ${RepoDockerHub}/$image1-${buildBranch}:$Tag-${buildVersion}
+                                    docker tag $image ${RepoDockerHub}/$imagename-${buildBranch}:$Tag-${buildVersion}
+                                    docker push ${RepoDockerHub}/$imagename-${buildBranch}:$Tag-${buildVersion}
                                 fi
                             }
-                            [[ $PJ_admin == "true" ]] && upload_docker_images_to_Hub $image1:$Tag
+                            [[ $PJ_admin == "true" ]] && upload_docker_images_to_Hub $imagename:$Tag
                         '''
                     }
                 }

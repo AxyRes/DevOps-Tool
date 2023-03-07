@@ -3,7 +3,7 @@ services:
   admin:
     build: app/dockerfile/.
     image: admin:1.0
-    container_name: quizonline
+    container_name: admin
     ports:
       - "18080:8080"
     environment:
