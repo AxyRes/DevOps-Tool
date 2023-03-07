@@ -10,7 +10,6 @@ pipeline{
         buildDiscarder(logRotator(numToKeepStr: '8', artifactNumToKeepStr: '8', daysToKeepStr: '7', artifactDaysToKeepStr: '7'))
     }
     environment {
-        Branch="dev"
         CredentialID="credential_docker_axyreshub"
         CredentialID_Nexus="credential_nexus_admin"
         Tag="1.0"
@@ -39,7 +38,7 @@ pipeline{
                         echo Start download package
                         if [ $PJ_admin == true ]
                         then
-                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O ${Nexus_URL}/${Repository_Nexus}/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war
+                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O ${Nexus_URL}/${Repository_Nexus}/admin/${PJNAME}/${buildBranch}/${buildVersion}/${PJNAME}-${Version}.war
                             mv ${PJNAME}-${Version}.war ${PJNAME}.war
                         fi
                         echo Done download package
