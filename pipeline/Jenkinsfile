@@ -13,7 +13,7 @@ pipeline{
     environment {
         Version="1.0-SNAPSHOT"
         PJNAME="QuizOnline"
-        Branch="dev"
+        Branch="dev.fe"
         CredentialID="credential_axyres_github"
         CredentialID_Nexus="credential_nexus_admin"
         ChatID_Telegram="5595929242"
