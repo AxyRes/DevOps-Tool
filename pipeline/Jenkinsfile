@@ -13,11 +13,11 @@ pipeline{
     environment {
         Version="1.0-SNAPSHOT"
         PJNAME="QuizOnline"
-        Branch="dev"
+        Branch="production"
         CredentialID="credential_axyres_github"
         CredentialID_Nexus="credential_nexus_admin"
         ChatID_Telegram="5595929242"
-        gitRepo="https://github.com/AxyRes/Quiz-Online.git"
+        gitRepo="https://github.com/DO-FE/Quiz-Online.git"
         URL_Nexus="http://192.168.1.2/nexus/repository"
         Repository_Nexus="maven-snapshots"
     }
