@@ -16,10 +16,11 @@ pipeline{
 
         Version="1.0-SNAPSHOT"
         artifactId="QuizOnline"
+        ImageName="quizonline"
 
         CredentialID="credential_axyres_github"
         CredentialID_Nexus="credential_nexus_admin"
-        
+
         ChatID_Telegram="5595929242"
         URL_Nexus="http://192.168.1.2/nexus/repository"
         Repository_Nexus="maven-snapshots"
@@ -78,7 +79,7 @@ pipeline{
                 }
             }
         }
-        stage('Stage 6 Trigger build job image') {
+        stage('Stage 6 Trigger job image') {
             steps {
                 script {
                     build job: "Quiz-Online-Dev-Image", parameters: [
@@ -87,7 +88,7 @@ pipeline{
                         string(name: "artifactId", value: "${artifactId}"),
                         string(name: "Version", value: "${Version}"),
                         string(name: "Nexus_URL", value: "${URL_Nexus}"),
-                        string(name: "Repository_Nexus", value: "${Repository_Nexus}"),
+                        string(name: "Repository_Nexus", value: "${ImageName}"),
                         string(name: "image1", value: "${Repository_Nexus}"),
                         booleanParam(name: 'PJ_admin', value: 'true'),
                         booleanParam(name: 'Start_container', value: 'true'),
