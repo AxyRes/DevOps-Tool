@@ -10,19 +10,19 @@ pipeline{
         buildDiscarder(logRotator(numToKeepStr: '8', artifactNumToKeepStr: '8', daysToKeepStr: '7', artifactDaysToKeepStr: '7'))
     }
     environment {
-        CredentialID=""
-        CredentialID_Nexus=""
-        Tag=""
-        imagename=""
-        RepoDockerHub=""
+        CredentialID_DockerHub="" // token use to push image to artifactory dockerhub
+        CredentialID_Nexus="" // token download package in artifactory
+        Tag="" // Tag Image
+        RepoDockerHub="" // Name Repo on DockerHub
     }
     parameters {
         string(name: "buildVersion", defaultValue: '', description: 'Build Version')
         string(name: "buildBranch", defaultValue: '', description: 'Build Branch')
-        string(name: "PJNAME", defaultValue: '', description: 'Project Name')
+        string(name: "artifactId", defaultValue: '', description: 'Project Name')
         string(name: "Version", defaultValue: '', description: 'Version Project')
         string(name: "Nexus_URL", defaultValue: '', description: 'URL of Atifactory')
         string(name: "Repository_Nexus", defaultValue: '', description: 'Repository of artifactory')
+        string(name: "image1", defaultValue: '', description: 'Name Image')
         booleanParam(name: 'PJ_admin', defaultValue: 'false', description: 'Build Admin Image')
         booleanParam(name: 'Start_container', defaultValue: 'false', description: 'Start container')
         booleanParam(name: 'Push_images_to_Hub', defaultValue: 'false', description: 'Push images to AxyResHub')
@@ -38,8 +38,8 @@ pipeline{
                         echo Start download package
                         if [ $PJ_admin == true ]
                         then
-                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O ${Nexus_URL}/${Repository_Nexus}/admin/${PJNAME}/${buildBranch}/${buildVersion}/${PJNAME}-${Version}.war
-                            mv ${PJNAME}-${Version}.war ${PJNAME}.war
+                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O ${Nexus_URL}/${Repository_Nexus}/admin/${artifactId}/${buildBranch}/${buildVersion}/${artifactId}-${Version}.war
+                            mv ${artifactId}-${Version}.war ${artifactId}.war
                         fi
                         echo Done download package
                     """
@@ -52,12 +52,12 @@ pipeline{
                     sh'''
                         prepare_package () {
                             app=$1
-                            package=${PJNAME}.war
-                            cp -f ${WORKSPACE}/packages/${PJNAME}.war ${WORKSPACE}/docker/$app/dockerfile/${PJNAME}.war
+                            package=${artifactId}.war
+                            cp -f ${WORKSPACE}/packages/${artifactId}.war ${WORKSPACE}/docker/$app/dockerfile/${artifactId}.war
                             cd ${WORKSPACE}/docker/$app/dockerfile/
                             sed -i "s|\\$package_file|$package|g" Dockerfile
                         }
-                        [[ $PJ_admin == "true" ]] && prepare_package $imagename
+                        [[ $PJ_admin == "true" ]] && prepare_package $image1
                     '''
                 }
             }
@@ -79,7 +79,7 @@ pipeline{
                             [[ $Start_container == "true" ]] && start_containers="" && detach="--detach"
                             cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $1
                         }
-                        [[ $PJ_admin == "true" ]] && build_docker $imagename
+                        [[ $PJ_admin == "true" ]] && build_docker $image1
                         echo End Build Docker Images
                     '''
                 }
@@ -88,7 +88,7 @@ pipeline{
         stage('Stage 4 Push image to Docker Hub') {
             steps{
                 script{
-                    withCredentials([usernamePassword(credentialsId: "$CredentialID", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
+                    withCredentials([usernamePassword(credentialsId: "$CredentialID_DockerHub", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
                         sh '''
                             docker login -u ${ARTIFACTORY_USER} -p ${ARTIFACTORY_PASSWORD}
                             upload_docker_images_to_Hub () {
@@ -96,11 +96,11 @@ pipeline{
                                 if [ $Push_images_to_Hub == "true" ]
                                 then
                                     echo Start Push image to Docker Hub
-                                    docker tag $image ${RepoDockerHub}/$imagename-${buildBranch}:$Tag-${buildVersion}
-                                    docker push ${RepoDockerHub}/$imagename-${buildBranch}:$Tag-${buildVersion}
+                                    docker tag $image ${RepoDockerHub}/$image1-${buildBranch}:$Tag-${buildVersion}
+                                    docker push ${RepoDockerHub}/$image1-${buildBranch}:$Tag-${buildVersion}
                                 fi
                             }
-                            [[ $PJ_admin == "true" ]] && upload_docker_images_to_Hub $imagename:$Tag
+                            [[ $PJ_admin == "true" ]] && upload_docker_images_to_Hub $image1:$Tag
                         '''
                     }
                 }
