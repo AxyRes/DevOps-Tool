@@ -5,8 +5,8 @@
 pipeline{
     agent{
         docker {
-            image 'axyres/maven:3.8.6-aws-17'
-            args '--user=0 -v $WORKSPACE:/tmp/sbapp -w /temp/sbapp'
+            image 'axyres/maven:3.8.6-aws-17' // use image axyres/maven:3.8.6-aws-17 to run pipeline
+            args '--user=0 -v $WORKSPACE:/tmp/sbapp -w /temp/sbapp' 
             reuseNode true
         }
     }
@@ -14,15 +14,20 @@ pipeline{
         buildDiscarder(logRotator(numToKeepStr: '8', artifactNumToKeepStr: '8', daysToKeepStr: '7', artifactDaysToKeepStr: '7'))
     }
     environment {
-        Version=""
-        PJNAME=""
-        Branch=""
-        CredentialID=""
-        CredentialID_Nexus=""
-        ChatID_Telegram=""
-        gitRepo=""
-        URL_Nexus=""
-        Repository_Nexus=""
+        gitRepoProjectBuild="" // Repo git to build code java
+        Branch="" // branch
+
+        Version="" // get in pom.xml
+        artifactId="" // get in pom.xml
+        ImageName="" // Name image
+
+        CredentialID_Git="" //token use for clone git
+        CredentialID_Nexus="" // toekn login to artifactory
+
+        ChatID_Telegram="" // get from userinbot in telegram
+	    
+        URL_Nexus=""  // url artifactory
+        Repository_Nexus="" // repository want to plate in artifactory
     }
     stages{
         stage('Stage 1 Getting build number'){
@@ -36,14 +41,14 @@ pipeline{
         }
         stage('Stage 2 Checkout Code'){
             steps{
-                checkout([$class: 'GitSCM', branches: [[name: "$Branch"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CheckoutOption', timeout: 90], [$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false, timeout: 90], [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', timeout: 90, trackingSubmodules: true]], gitTool: 'Default', submoduleCfg: [], userRemoteConfigs: [[credentialsId: "$CredentialID", url: "$gitRepo"]]])
+                checkout([$class: 'GitSCM', branches: [[name: "$Branch"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CheckoutOption', timeout: 90], [$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false, timeout: 90], [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', timeout: 90, trackingSubmodules: true]], gitTool: 'Default', submoduleCfg: [], userRemoteConfigs: [[credentialsId: "$CredentialID_Git", url: "$gitRepoProjectBuild"]]])
             }
         }
         stage('Stage 3 Get commit harsh'){
             steps{
                 sh"""
                     cd ${WORKSPACE}/
-                    echo "${PJNAME}" > ${WORKSPACE}/commit.txt
+                    echo "${artifactId}" > ${WORKSPACE}/commit.txt
                     /bin/git log -1 --pretty=format:'%h, %an, %ar, %aD, %s' >> ${WORKSPACE}/commit.txt
 					echo "\n############################################" >> ${WORKSPACE}/commit.txt
                 """
@@ -66,24 +71,25 @@ pipeline{
                     withCredentials([usernamePassword(credentialsId: "$CredentialID_Nexus", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
                         sh"""
                             echo Start Push pakage to Artifactory ......
-                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "${URL_Nexus}/${Repository_Nexus}/admin/${PJNAME}/${Branch}/latest/${PJNAME}-${Version}.war"
-                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${PJNAME}-${Version}.war" "${URL_Nexus}/${Repository_Nexus}/admin/${PJNAME}/${Branch}/${buildVersion}/${PJNAME}-${Version}.war"
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${artifactId}-${Version}.war" "${URL_Nexus}/${Repository_Nexus}/admin/${artifactId}/${Branch}/latest/${artifactId}-${Version}.war"
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${artifactId}-${Version}.war" "${URL_Nexus}/${Repository_Nexus}/admin/${artifactId}/${Branch}/${buildVersion}/${artifactId}-${Version}.war"
                             echo End Upload package ......
                         """
                     }
                 }
             }
         }
-        stage('Stage 6 Trigger build job image') {
+        stage('Stage 6 Trigger job image') {
             steps {
                 script {
-                    build job: "Quiz-Online-Dev-Image", parameters: [
+                    build job: "Dev-Images-Build", parameters: [
                         string(name: "buildVersion", value: "${buildVersion}"),
                         string(name: "buildBranch", value: "${Branch}"),
-                        string(name: "PJNAME", value: "${PJNAME}"),
+                        string(name: "artifactId", value: "${artifactId}"),
                         string(name: "Version", value: "${Version}"),
                         string(name: "Nexus_URL", value: "${URL_Nexus}"),
                         string(name: "Repository_Nexus", value: "${Repository_Nexus}"),
+                        string(name: "image1", value: "${ImageName}"),
                         booleanParam(name: 'PJ_admin', value: 'true'),
                         booleanParam(name: 'Start_container', value: 'true'),
                         booleanParam(name: 'Push_images_to_Hub', value: 'true')
@@ -101,7 +107,7 @@ pipeline{
             echo 'I success'
             script {
                 def commitMsg = readFile "${WORKSPACE}/commit.txt"
-                telegramSend (message: """[BUILD SUCCESS] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion - COMMIT MESSAGE: $commitMsg""", chatId: "${ChatID_Telegram}")
+                telegramSend (message: """[BUILD SUCCESS] - PROJECT: $artifactId - BRANCH: $Branch - VERSION: $buildVersion - COMMIT MESSAGE: $commitMsg""", chatId: "${ChatID_Telegram}")
             }
             deleteDir()
         }
@@ -109,7 +115,7 @@ pipeline{
             echo 'I failure'
             script{
                 def commitMsg = readFile "${WORKSPACE}/commit.txt"
-                telegramSend (message: """[BUILD FAILED] - PROJECT: $PJNAME - BRANCH: $Branch - VERSION: $buildVersion - COMMIT MESSAGE: $commitMsg""", chatId: "${ChatID_Telegram}")
+                telegramSend (message: """[BUILD FAILED] - PROJECT: $artifactId - BRANCH: $Branch - VERSION: $buildVersion - COMMIT MESSAGE: $commitMsg""", chatId: "${ChatID_Telegram}")
             }
             deleteDir()
         }
