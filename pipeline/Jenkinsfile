@@ -88,8 +88,8 @@ pipeline{
                         string(name: "artifactId", value: "${artifactId}"),
                         string(name: "Version", value: "${Version}"),
                         string(name: "Nexus_URL", value: "${URL_Nexus}"),
-                        string(name: "Repository_Nexus", value: "${ImageName}"),
-                        string(name: "image1", value: "${Repository_Nexus}"),
+                        string(name: "Repository_Nexus", value: "${Repository_Nexus}"),
+                        string(name: "image1", value: "${ImageName}"),
                         booleanParam(name: 'PJ_admin', value: 'true'),
                         booleanParam(name: 'Start_container', value: 'true'),
                         booleanParam(name: 'Push_images_to_Hub', value: 'true')
