@@ -11,12 +11,12 @@ pipeline{
         buildDiscarder(logRotator(numToKeepStr: '8', artifactNumToKeepStr: '8', daysToKeepStr: '7', artifactDaysToKeepStr: '7'))
     }
     environment {
-        gitRepoProjectBuild="https://github.com/DO-FE/Quiz-Online.git"
+        gitRepoProjectBuild="https://github.com/DO-FE/ShopMates.git"
         Branch="production"
 
         Version="1.0-SNAPSHOT"
-        artifactId="QuizOnline"
-        ImageName="quizonline"
+        artifactId="ShopMates"
+        ImageName="shopmates"
 
         CredentialID="credential_axyres_github"
         CredentialID_Nexus="credential_nexus_admin"
