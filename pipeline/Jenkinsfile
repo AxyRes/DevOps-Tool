@@ -108,6 +108,7 @@ pipeline{
             script {
                 def commitMsg = readFile "${WORKSPACE}/commit.txt"
                 telegramSend (message: """[BUILD SUCCESS] - PROJECT: $artifactId - BRANCH: $Branch - VERSION: $buildVersion - COMMIT MESSAGE: $commitMsg""", chatId: "${ChatID_Telegram}")
+            deleteDir()
             }
         }
         failure {
@@ -115,6 +116,7 @@ pipeline{
             script{
                 def commitMsg = readFile "${WORKSPACE}/commit.txt"
                 telegramSend (message: """[BUILD FAILED] - PROJECT: $artifactId - BRANCH: $Branch - VERSION: $buildVersion - COMMIT MESSAGE: $commitMsg""", chatId: "${ChatID_Telegram}")
+            deleteDir()
             }
         }
     }
