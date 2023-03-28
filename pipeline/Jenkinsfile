@@ -72,11 +72,11 @@ pipeline{
                             start_containers="--no-start"
                             detach=""
                             container_name="$(echo $service | tr - _)"
-
+                            echo webapps_$image1
                             docker rm -f $container_name || true
                             docker rmi -f pj_$container_name || true
-                            docker volume rm webapps || true
-                            docker volume create webapps
+                            docker volume rm webapps_$image1 || true
+                            docker volume create webapps_$image1
                             [[ $Start_container == "true" ]] && start_containers="" && detach="--detach"
                             cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $1
                         }
