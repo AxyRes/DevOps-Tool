@@ -10,7 +10,22 @@ services:
       - INIT_MEM=2048m
       - MAX_MEM=4096m
     volumes:
-      - webapps:/usr/local/tomcat/webapps
+      - webapps_quizonline:/usr/local/tomcat/webapps
+  
+  shopmates:
+    build: shopmates/dockerfile/.
+    image: shopmates:1.0
+    container_name: shopmates
+    ports:
+      - "18081:8080"
+    environment:
+      - INIT_MEM=2048m
+      - MAX_MEM=4096m
+    volumes:
+      - webapps_shopmates:/usr/local/tomcat/webapps
+
 volumes:
-  webapps:
+  webapps_quizonline:
+    external: true
+  webapps_shopmates:
     external: true

@@ -13,16 +13,16 @@ pipeline{
         CredentialID="credential_docker_axyreshub"
         CredentialID_Nexus="credential_nexus_admin"
         Tag="1.0"
-        image1="quizonline"
         RepoDockerHub="axyres"
     }
     parameters {
         string(name: "buildVersion", defaultValue: '', description: 'Build Version')
         string(name: "buildBranch", defaultValue: '', description: 'Build Branch')
-        string(name: "PJNAME", defaultValue: '', description: 'Project Name')
+        string(name: "artifactId", defaultValue: '', description: 'Project Name')
         string(name: "Version", defaultValue: '', description: 'Version Project')
         string(name: "Nexus_URL", defaultValue: '', description: 'URL of Atifactory')
         string(name: "Repository_Nexus", defaultValue: '', description: 'Repository of artifactory')
+        string(name: "image1", defaultValue: '', description: 'Name Image')
         booleanParam(name: 'PJ_admin', defaultValue: 'false', description: 'Build Admin Image')
         booleanParam(name: 'Start_container', defaultValue: 'false', description: 'Start container')
         booleanParam(name: 'Push_images_to_Hub', defaultValue: 'false', description: 'Push images to AxyResHub')
@@ -38,8 +38,8 @@ pipeline{
                         echo Start download package
                         if [ $PJ_admin == true ]
                         then
-                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O ${Nexus_URL}/${Repository_Nexus}/admin/${PJNAME}/${buildBranch}/${buildVersion}/${PJNAME}-${Version}.war
-                            mv ${PJNAME}-${Version}.war ${PJNAME}.war
+                            curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" -O ${Nexus_URL}/${Repository_Nexus}/admin/${artifactId}/${buildBranch}/${buildVersion}/${artifactId}-${Version}.war
+                            mv ${artifactId}-${Version}.war ${artifactId}.war
                         fi
                         echo Done download package
                     """
@@ -52,8 +52,8 @@ pipeline{
                     sh'''
                         prepare_package () {
                             app=$1
-                            package=${PJNAME}.war
-                            cp -f ${WORKSPACE}/packages/${PJNAME}.war ${WORKSPACE}/docker/$app/dockerfile/${PJNAME}.war
+                            package=${artifactId}.war
+                            cp -f ${WORKSPACE}/packages/${artifactId}.war ${WORKSPACE}/docker/$app/dockerfile/${artifactId}.war
                             cd ${WORKSPACE}/docker/$app/dockerfile/
                             sed -i "s|\\$package_file|$package|g" Dockerfile
                         }
@@ -72,11 +72,11 @@ pipeline{
                             start_containers="--no-start"
                             detach=""
                             container_name="$(echo $service | tr - _)"
-
+                            echo webapps_$image1
                             docker rm -f $container_name || true
                             docker rmi -f pj_$container_name || true
-                            docker volume rm webapps || true
-                            docker volume create webapps
+                            docker volume rm webapps_$image1 || true
+                            docker volume create webapps_$image1
                             [[ $Start_container == "true" ]] && start_containers="" && detach="--detach"
                             cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $1
                         }
