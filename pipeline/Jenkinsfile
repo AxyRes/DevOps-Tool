@@ -69,9 +69,9 @@ pipeline{
                     withCredentials([usernamePassword(credentialsId: "$CredentialID_Nexus", passwordVariable:'ARTIFACTORY_PASSWORD', usernameVariable:'ARTIFACTORY_USER')]) {
                         sh"""
                             echo Start Push pakage to Artifactory ......
-
-                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${artifactId}-${Version}.war" "${URL_Nexus}/${Repository_Nexus}/admin/${artifactId}/${Branch}/latest/${artifactId}-${Version}.war"
-                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${artifactId}-${Version}.war" "${URL_Nexus}/${Repository_Nexus}/admin/${artifactId}/${Branch}/${buildVersion}/${artifactId}-${Version}.war"
+                            
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${artifactId}.war" "${URL_Nexus}/${Repository_Nexus}/admin/${artifactId}/${Branch}/latest/${artifactId}-${Version}.war"
+                            curl -v -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" --upload-file "${WORKSPACE}/target/${artifactId}.war" "${URL_Nexus}/${Repository_Nexus}/admin/${artifactId}/${Branch}/${buildVersion}/${artifactId}-${Version}.war"
 
                             echo End Upload package ......
                         """
