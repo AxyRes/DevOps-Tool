@@ -78,7 +78,7 @@ pipeline{
                             docker volume rm webapps_$image1 || true
                             docker volume create webapps_$image1
                             [[ $Start_container == "true" ]] && start_containers="" && detach="--detach"
-                            cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $1
+                            cd ${WORKSPACE}/docker && /usr/local/bin/docker-compose up $detach --force-recreate --build $start_containers $container_name
                         }
                         [[ $PJ_admin == "true" ]] && build_docker $image1
                         echo End Build Docker Images
