@@ -4,6 +4,7 @@ services:
     build: quizonline/dockerfile/.
     image: quizonline:1.0
     container_name: quizonline
+    restarts: always
     ports:
       - "18080:8080"
     environment:
@@ -16,6 +17,7 @@ services:
     build: shopmates/dockerfile/.
     image: shopmates:1.0
     container_name: shopmates
+    restarts: always
     ports:
       - "18081:8080"
     environment:
