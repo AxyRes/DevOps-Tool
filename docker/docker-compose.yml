@@ -4,27 +4,27 @@ services:
     build: quizonline/dockerfile/.
     image: quizonline:1.0
     container_name: quizonline
-    restarts: always
+    restart: always
     ports:
       - "18080:8080"
     environment:
       - INIT_MEM=2048m
       - MAX_MEM=4096m
     volumes:
-      - webapps_quizonline:/usr/local/tomcat/webapps
+      - webapps_quizonline:/usr/local/tomcat/
   
   shopmates:
     build: shopmates/dockerfile/.
     image: shopmates:1.0
     container_name: shopmates
-    restarts: always
+    restart: always
     ports:
       - "18081:8080"
     environment:
       - INIT_MEM=2048m
       - MAX_MEM=4096m
     volumes:
-      - webapps_shopmates:/usr/local/tomcat/webapps
+      - webapps_shopmates:/usr/local/tomcat/
 
 volumes:
   webapps_quizonline:
