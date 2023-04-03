@@ -11,7 +11,7 @@ services:
       - INIT_MEM=2048m
       - MAX_MEM=4096m
     volumes:
-      - webapps_quizonline:/usr/local/tomcat/
+      - webapps_quizonline:/usr/local/tomcat
   
   shopmates:
     build: shopmates/dockerfile/.
@@ -24,7 +24,7 @@ services:
       - INIT_MEM=2048m
       - MAX_MEM=4096m
     volumes:
-      - webapps_shopmates:/usr/local/tomcat/
+      - webapps_shopmates:/usr/local/tomcat
 
 volumes:
   webapps_quizonline:
