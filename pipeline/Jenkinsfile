@@ -20,8 +20,8 @@ pipeline{
         string(name: "buildBranch", defaultValue: '', description: 'Build Branch')
         string(name: "artifactId", defaultValue: '', description: 'Project Name')
         string(name: "Version", defaultValue: '', description: 'Version Project')
-        string(name: "Nexus_URL", defaultValue: '', description: 'URL of Atifactory')
-        string(name: "Repository_Nexus", defaultValue: '', description: 'Repository of artifactory')
+        string(name: "Nexus_URL", defaultValue: 'http://192.168.1.2/nexus/repository', description: 'URL of Atifactory')
+        string(name: "Repository_Nexus", defaultValue: 'maven-snapshots', description: 'Repository of artifactory')
         string(name: "image1", defaultValue: '', description: 'Name Image')
         booleanParam(name: 'PJ_admin', defaultValue: 'false', description: 'Build Admin Image')
         booleanParam(name: 'Start_container', defaultValue: 'false', description: 'Start container')
@@ -110,6 +110,7 @@ pipeline{
     post{
         always{
             echo 'One way or another, I have finished'
+            deleteDir()
         }
     }
 }
