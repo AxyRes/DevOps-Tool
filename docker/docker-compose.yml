@@ -25,9 +25,24 @@ services:
       - MAX_MEM=4096m
     volumes:
       - webapps_shopmates:/usr/local/tomcat
+  
+  ecommerce:
+    build: ecommerce/dockerfile/.
+    image: ecommerce:1.0
+    container_name: ecommerce
+    restart: always
+    ports:
+      - "18082:8080"
+    environment:
+      - INIT_MEM=2048m
+      - MAX_MEM=4096m
+    volumes:
+      - webapps_ecommerce:/usr/local/tomcat
 
 volumes:
   webapps_quizonline:
     external: true
   webapps_shopmates:
+    external: true
+  webapps_ecommerce:
     external: true
